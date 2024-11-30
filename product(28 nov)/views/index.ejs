@@ -12,17 +12,17 @@
     <div class="container">
         <h1>Product List</h1>
         <ul>
-            <p% products.forEach(product=> { %>
+            <% products.forEach(product=> { %>
                 <li>
                     <img src="https://via.placeholder.com/300x200" alt="= product.name %>">
                     <h2>
-                        <p%= product.name %>
+                        <%= product.name %>
                     </h2>
                     <p>
-                        <p%= product.description %>
+                        <%= product.description %>
                     </p>
                 </li>
-                <p% }) %>
+                <% }) %>
         </ul>
         <a href="/add-product">Add New Product</a>
     </div>
