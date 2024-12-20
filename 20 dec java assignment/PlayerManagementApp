@@ -1,0 +1,285 @@
+package java1;
+
+import java.sql.*;
+import java.util.*;
+
+// PlayerOperations Interface
+interface PlayerOperations {
+    void createPlayer(Player player);
+    Player getPlayerById(int id);
+    List<Player> getAllPlayers();
+    void updatePlayer(Player player);
+    void deletePlayer(int id);
+    List<Player> getPlayersByCountry(String country);
+    List<Player> getPlayersByExperience();
+    List<Player> getPlayersSortedBySkill();
+}
+
+// AbstractPlayer Class
+abstract class AbstractPlayer {
+    protected int playerId;
+    protected String playerName;
+    protected String playerSkill;
+    protected int playerExp;
+    protected String playerCountry;
+    protected double playerScore;
+
+    public AbstractPlayer(int playerId, String playerName, String playerSkill, int playerExp, String playerCountry, double playerScore) {
+        this.playerId = playerId;
+        this.playerName = playerName;
+        this.playerSkill = playerSkill;
+        this.playerExp = playerExp;
+        this.playerCountry = playerCountry;
+        this.playerScore = playerScore;
+    }
+
+    public int getPlayerId() { return playerId; }
+    public void setPlayerId(int playerId) { this.playerId = playerId; }
+    public String getPlayerName() { return playerName; }
+    public void setPlayerName(String playerName) { this.playerName = playerName; }
+    public String getPlayerSkill() { return playerSkill; }
+    public void setPlayerSkill(String playerSkill) { this.playerSkill = playerSkill; }
+    public int getPlayerExp() { return playerExp; }
+    public void setPlayerExp(int playerExp) { this.playerExp = playerExp; }
+    public String getPlayerCountry() { return playerCountry; }
+    public void setPlayerCountry(String playerCountry) { this.playerCountry = playerCountry; }
+    public double getPlayerScore() { return playerScore; }
+    public void setPlayerScore(double playerScore) { this.playerScore = playerScore; }
+
+    public abstract void displayPlayerInfo();
+}
+
+// Player Class
+class Player extends AbstractPlayer implements PlayerOperations {
+
+    public Player(int playerId, String playerName, String playerSkill, int playerExp, String playerCountry, double playerScore) {
+        super(playerId, playerName, playerSkill, playerExp, playerCountry, playerScore);
+    }
+
+    @Override
+    public void createPlayer(Player player) {
+        String sql = "INSERT INTO players (name, skill, exp, country, overall_score) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/player_management", "root", "Dipudidi@1234");
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, player.getPlayerName());
+            pstmt.setString(2, player.getPlayerSkill());
+            pstmt.setInt(3, player.getPlayerExp());
+            pstmt.setString(4, player.getPlayerCountry());
+            pstmt.setDouble(5, player.getPlayerScore());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public Player getPlayerById(int id) {
+        String sql = "SELECT * FROM players WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/player_management", "root", "Dipudidi@1234");
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return new Player(rs.getInt("id"), rs.getString("name"), rs.getString("skill"),
+                        rs.getInt("exp"), rs.getString("country"), rs.getDouble("overall_score"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<Player> getAllPlayers() {
+        List<Player> playerList = new ArrayList<>();
+        String sql = "SELECT * FROM players";
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/player_management", "root", "Dipudidi@1234");
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Player player = new Player(rs.getInt("id"), rs.getString("name"), rs.getString("skill"),
+                        rs.getInt("exp"), rs.getString("country"), rs.getDouble("overall_score"));
+                playerList.add(player);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return playerList;
+    }
+
+    @Override
+    public void updatePlayer(Player player) {
+        String sql = "UPDATE players SET name = ?, skill = ?, exp = ?, country = ?, overall_score = ? WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/player_management", "root", "Dipudidi@1234");
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, player.getPlayerName());
+            pstmt.setString(2, player.getPlayerSkill());
+            pstmt.setInt(3, player.getPlayerExp());
+            pstmt.setString(4, player.getPlayerCountry());
+            pstmt.setDouble(5, player.getPlayerScore());
+            pstmt.setInt(6, player.getPlayerId());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void deletePlayer(int id) {
+        String sql = "DELETE FROM players WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/player_management", "root", "Dipudidi@1234");
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<Player> getPlayersByCountry(String country) {
+        List<Player> playerList = new ArrayList<>();
+        String sql = "SELECT * FROM players WHERE country = ?";
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/player_management", "root", "Dipudidi@1234");
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, country);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                Player player = new Player(rs.getInt("id"), rs.getString("name"), rs.getString("skill"),
+                        rs.getInt("exp"), rs.getString("country"), rs.getDouble("overall_score"));
+                playerList.add(player);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return playerList;
+    }
+
+    @Override
+    public List<Player> getPlayersByExperience() {
+        List<Player> playerList = new ArrayList<>();
+        String sql = "SELECT * FROM players ORDER BY exp DESC";
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/player_management", "root", "Dipudidi@1234");
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Player player = new Player(rs.getInt("id"), rs.getString("name"), rs.getString("skill"),
+                        rs.getInt("exp"), rs.getString("country"), rs.getDouble("overall_score"));
+                playerList.add(player);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return playerList;
+    }
+
+    @Override
+    public List<Player> getPlayersSortedBySkill() {
+        List<Player> playerList = getAllPlayers();
+        playerList.sort(Comparator.comparing(Player::getPlayerSkill));
+        return playerList;
+    }
+
+    @Override
+    public void displayPlayerInfo() {
+        System.out.println("ID: " + playerId + ", Name: " + playerName + ", Skill: " + playerSkill + ", Experience: " + playerExp + " years, Country: " + playerCountry + ", Overall Score: " + playerScore);
+    }
+}
+
+// Main Application
+public class PlayerManagementApp {
+    public static void main(String[] args) {
+        Scanner inputScanner = new Scanner(System.in);
+        PlayerOperations playerOperations = new Player(0, "", "", 0, "", 0.0); // Placeholder for Player instance
+
+        while (true) {
+            System.out.println("1. Add Player");
+            System.out.println("2. View Player");
+            System.out.println("3. Update Player");
+            System.out.println("4. Delete Player");
+            System.out.println("5. View All Players");
+            System.out.println("6. Sort Players by Skill");
+            System.out.println("7. View Players by Country");
+            System.out.println("8. View Players by Experience");
+            System.out.println("9. Exit");
+
+            int userChoice = inputScanner.nextInt();
+            inputScanner.nextLine();
+
+            switch (userChoice) {
+                case 1:
+                    System.out.println("Enter name, skill, experience, country, overall score:");
+                    String playerName = inputScanner.nextLine();
+                    String playerSkill = inputScanner.nextLine();
+                    int playerExp = inputScanner.nextInt();
+                    inputScanner.nextLine();
+                    String playerCountry = inputScanner.nextLine();
+                    double playerScore = inputScanner.nextDouble();
+                    Player newPlayer = new Player(0, playerName, playerSkill, playerExp, playerCountry, playerScore);
+                    playerOperations.createPlayer(newPlayer);
+                    break;
+                case 2:
+                    System.out.println("Enter Player ID to view:");
+                    int playerId = inputScanner.nextInt();
+                    Player player = playerOperations.getPlayerById(playerId);
+                    if (player != null) {
+                        player.displayPlayerInfo();
+                    } else {
+                        System.out.println("Player not found.");
+                    }
+                    break;
+                case 3:
+                    System.out.println("Enter Player ID to update:");
+                    int updateId = inputScanner.nextInt();
+                    inputScanner.nextLine();
+                    Player updatePlayer = playerOperations.getPlayerById(updateId);
+                    if (updatePlayer != null) {
+                        System.out.println("Update name, skill, experience, country, overall score:");
+                        String updatedName = inputScanner.nextLine();
+                        String updatedSkill = inputScanner.nextLine();
+                        int updatedExp = inputScanner.nextInt();
+                        inputScanner.nextLine();
+                        String updatedCountry = inputScanner.nextLine();
+                        double updatedScore = inputScanner.nextDouble();
+                        updatePlayer.setPlayerName(updatedName);
+                        updatePlayer.setPlayerSkill(updatedSkill);
+                        updatePlayer.setPlayerExp(updatedExp);
+                        updatePlayer.setPlayerCountry(updatedCountry);
+                        updatePlayer.setPlayerScore(updatedScore);
+                        playerOperations.updatePlayer(updatePlayer);
+                    } else {
+                        System.out.println("Player not found.");
+                    }
+                    break;
+                case 4:
+                    System.out.println("Enter Player ID to delete:");
+                    int deleteId = inputScanner.nextInt();
+                    playerOperations.deletePlayer(deleteId);
+                    break;
+                case 5:
+                    List<Player> allPlayers = playerOperations.getAllPlayers();
+                    allPlayers.forEach(Player::displayPlayerInfo);
+                    break;
+                case 6:
+                    List<Player> sortedPlayers = playerOperations.getPlayersSortedBySkill();
+                    sortedPlayers.forEach(Player::displayPlayerInfo);
+                    break;
+                case 7:
+                    System.out.println("Enter country to filter by:");
+                    String filterCountry = inputScanner.nextLine();
+                    List<Player> playersByCountry = playerOperations.getPlayersByCountry(filterCountry);
+                    playersByCountry.forEach(Player::displayPlayerInfo);
+                    break;
+                case 8:
+                    List<Player> playersByExp = playerOperations.getPlayersByExperience();
+                    playersByExp.forEach(Player::displayPlayerInfo);
+                    break;
+                case 9:
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice, please try again.");
+            }
+        }
+    }
+}
