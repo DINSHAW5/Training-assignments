@@ -1,0 +1,53 @@
+package classcode;
+
+import java.util.HashMap;
+import java.util.Scanner;
+
+public class ProductManager {
+
+    // Method to search for a product in the catalog
+    public static void searchProduct(HashMap<String, String> productCatalog, String productName) {
+        if (productCatalog.containsKey(productName)) {
+            System.out.println("Product found: " + productName + " - " + productCatalog.get(productName));
+        } else {
+            System.out.println("Product not found: " + productName);
+        }
+    }
+
+    // Method to add a product to the catalog
+    public static void addProduct(HashMap<String, String> productCatalog, String productName, String productDescription) {
+        productCatalog.put(productName, productDescription);
+        System.out.println("Product added: " + productName + " - " + productDescription);
+    }
+
+    public static void main(String[] args) {
+        // Initialize a product catalog with predefined items
+        HashMap<String, String> productCatalog = new HashMap<>();
+
+        productCatalog.put("Apple", "A sweet, crunchy fruit that is rich in vitamins.");
+        productCatalog.put("Banana", "A soft, sweet fruit with a high potassium content.");
+        productCatalog.put("Carrot", "A root vegetable, usually orange, rich in beta-carotene.");
+        productCatalog.put("Pasta", "A type of Italian food made from wheat, often served with sauce.");
+        productCatalog.put("Pizza", "A flatbread topped with tomato sauce, cheese, and various toppings.");
+
+        Scanner scanner = new Scanner(System.in);
+
+        // Add a new product based on user input
+        System.out.println("Enter the name of a food item to add: ");
+        String newProductName = scanner.nextLine();
+        System.out.println("Enter a description for the new food item: ");
+        String newProductDescription = scanner.nextLine();
+        addProduct(productCatalog, newProductName, newProductDescription);
+
+        // Search for a product based on user input
+        System.out.println("\nEnter a food item name to search for: ");
+        String searchProductName = scanner.nextLine();
+        searchProduct(productCatalog, searchProductName);
+
+       
+        System.out.println("\nCurrent Product Catalog: ");
+        System.out.println(productCatalog);
+
+        scanner.close();
+    }
+}
