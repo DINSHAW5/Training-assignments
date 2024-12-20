@@ -1,0 +1,165 @@
+package collections;
+
+import java.util.HashSet;
+import java.util.Objects;
+
+
+class BankAccount {
+    private String accountNumber;
+    private double balance;
+    private boolean isActive;
+
+    public BankAccount(String accountNumber, double balance) {
+        this.accountNumber = accountNumber;
+        this.balance = balance;
+        this.isActive = true; // Accounts are active by default
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+        }
+    }
+
+    public boolean withdraw(double amount) {
+        if (amount > 0 && balance >= amount) {
+            balance -= amount;
+            return true;
+        }
+        return false;
+    }
+
+    public void deactivate() {
+        this.isActive = false;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        BankAccount that = (BankAccount) obj;
+        return Objects.equals(accountNumber, that.accountNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(accountNumber);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("BankAccount{accountNumber='%s', balance=%.2f, isActive=%s}",
+                accountNumber, balance, isActive);
+    }
+}
+
+
+public class BankingSystem {
+    public static void main(String[] args) {
+        
+        HashSet<BankAccount> accounts = new HashSet<>();
+
+        
+        BankAccount account1 = new BankAccount("501", 5000);
+        BankAccount account2 = new BankAccount("502", 3000);
+        BankAccount account3 = new BankAccount("503", 10000);
+
+        accounts.add(account1);
+        accounts.add(account2);
+        accounts.add(account3);
+
+       
+        performDeposit(accounts, "501", 1000);
+        performDeposit(accounts, "502", 500);
+
+        
+        performWithdrawal(accounts, "501", 1500);
+
+        
+        System.out.println("Balance of account 501: " + checkBalance(accounts, "501"));
+        System.out.println("Balance of account 502: " + checkBalance(accounts, "502"));
+        System.out.println("Balance of account 503: " + checkBalance(accounts, "503"));
+
+       
+        account2.deactivate();
+        removeInactiveAccounts(accounts);
+
+        
+        BankAccount highestBalanceAccount = getAccountWithHighestBalance(accounts);
+        BankAccount lowestBalanceAccount = getAccountWithLowestBalance(accounts);
+        System.out.println("\nAccount with the highest balance: " + highestBalanceAccount);
+        System.out.println("Account with the lowest balance: " + lowestBalanceAccount);
+
+       
+        System.out.println("\nAll Active Accounts:");
+        accounts.forEach(System.out::println);
+    }
+
+   
+    public static void performDeposit(HashSet<BankAccount> accounts, String accountNumber, double amount) {
+        BankAccount account = findAccount(accounts, accountNumber);
+        if (account != null) {
+            account.deposit(amount);
+            System.out.println("Deposited " + amount + " to account " + accountNumber);
+        }
+    }
+
+    
+    public static void performWithdrawal(HashSet<BankAccount> accounts, String accountNumber, double amount) {
+        BankAccount account = findAccount(accounts, accountNumber);
+        if (account != null && account.withdraw(amount)) {
+            System.out.println("Withdrew " + amount + " from account " + accountNumber);
+        } else {
+            System.out.println("Insufficient balance or invalid amount for account " + accountNumber);
+        }
+    }
+
+   
+    public static double checkBalance(HashSet<BankAccount> accounts, String accountNumber) {
+        BankAccount account = findAccount(accounts, accountNumber);
+        if (account != null) {
+            return account.getBalance();
+        }
+        return -1; // Account not found
+    }
+
+   
+    private static BankAccount findAccount(HashSet<BankAccount> accounts, String accountNumber) {
+        return accounts.stream()
+                .filter(account -> account.getAccountNumber().equals(accountNumber))
+                .findFirst()
+                .orElse(null);
+    }
+
+    
+    private static void removeInactiveAccounts(HashSet<BankAccount> accounts) {
+        accounts.removeIf(account -> !account.isActive());
+        System.out.println("Inactive accounts have been removed.");
+    }
+
+   
+    private static BankAccount getAccountWithHighestBalance(HashSet<BankAccount> accounts) {
+        return accounts.stream()
+                .max((account1, account2) -> Double.compare(account1.getBalance(), account2.getBalance()))
+                .orElse(null);
+    }
+
+    
+    private static BankAccount getAccountWithLowestBalance(HashSet<BankAccount> accounts) {
+        return accounts.stream()
+                .min((account1, account2) -> Double.compare(account1.getBalance(), account2.getBalance()))
+                .orElse(null);
+    }
+}
