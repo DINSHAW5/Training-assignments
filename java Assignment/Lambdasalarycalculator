@@ -1,0 +1,38 @@
+package classcode;
+
+interface SalaryCalculator {
+    double calculate(double salary);
+}
+
+public class LambdaSalaryCalculator {
+
+    public static void main(String[] args) {
+       
+        double initialSalary = 50000;
+
+       
+        SalaryCalculator withBonus = salary -> salary + (salary * 0.10);
+
+       
+        SalaryCalculator withDeduction = salary -> salary - (salary * 0.05);
+
+       
+        SalaryCalculator withIncrement = salary -> {
+            if (salary < 20000) {
+                return salary + (salary * 0.15);
+            } else {
+                return salary;
+            }
+        };
+
+       
+        SalaryCalculator noChange = salary -> salary;
+
+        
+        System.out.println("Initial salary: " + initialSalary);
+        System.out.println("Salary without change: " + noChange.calculate(initialSalary));
+        System.out.println("Salary with bonus: " + withBonus.calculate(initialSalary));
+        System.out.println("Salary with deduction of 5%: " + withDeduction.calculate(initialSalary));
+        System.out.println("Salary with increment (if initial salary < 20000): " + withIncrement.calculate(initialSalary));
+    }
+}
